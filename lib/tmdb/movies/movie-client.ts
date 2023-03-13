@@ -6,20 +6,13 @@ import {
 } from "@/infra/protocols/http/HttpClient"
 
 import { Movie, MovieDetail, ResultList, TMDBCredits } from "../models"
+import { Fetcher } from "../utils/fetcher"
 
-export class MovieClient {
-  constructor(private readonly httpClient: HttpClient) {}
-
-  private handleResponse<T = any>(response: HttpResponse<T>): T {
-    switch (response.statusCode) {
-      case HttpStatusCode.ok:
-        return response.body!
-      case HttpStatusCode.unauthorized:
-        throw new UnauthorizedError()
-      default:
-        throw new UnexpectedError()
-    }
+export class MovieClient extends Fetcher {
+  constructor(private readonly httpClient: HttpClient) {
+    super()
   }
+
 
   async loadPopular(page = 1): Promise<ResultList<Movie>> {
     const response = await this.httpClient.request<ResultList<Movie>>({
@@ -29,7 +22,10 @@ export class MovieClient {
         page,
       },
     })
-    return this.handleResponse(response)
+    return this.handleResponse(response, (data) => ({
+      ...data,
+      results: data.results.map((movie) => ({...movie, __typename: "Movie"})),
+    }))
   }
 
   async loadTopRated(page = 1): Promise<ResultList<Movie>> {
@@ -40,7 +36,10 @@ export class MovieClient {
         page,
       },
     })
-    return this.handleResponse(response)
+    return this.handleResponse(response, (data) => ({
+      ...data,
+      results: data.results.map((movie) => ({...movie, __typename: "Movie"})),
+    }))
   }
 
   async loadDetails(movieId: number): Promise<MovieDetail> {
@@ -49,7 +48,7 @@ export class MovieClient {
       url: `movie/${movieId}`,
     })
 
-    return this.handleResponse(response)
+    return this.handleResponse(response, (data) => data)
   }
 
   async loadCredits(movieId: number): Promise<TMDBCredits> {
@@ -58,6 +57,6 @@ export class MovieClient {
       url: `movie/${movieId}/credits`,
     })
 
-    return this.handleResponse(response)
+    return this.handleResponse(response, (data) => data)
   }
 }

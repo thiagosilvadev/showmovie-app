@@ -8,7 +8,6 @@ type PosterSizes =
   | 'original'
 
 type BackdropSizes = 'w300' | 'w780' | 'w1280' | 'original'
-0
 
 export interface Movie {
   __typename: 'Movie'

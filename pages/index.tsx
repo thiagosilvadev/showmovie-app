@@ -11,10 +11,13 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Typography } from "@/components/ui/typography"
+import { movieOrTvShowToCardProps } from "@/mappers/card-mapper"
+import { Movie, TvShow } from "@/lib/tmdb/models"
 
 
-export default function IndexPage(props) {
-  console.log(props)
+export default function IndexPage(props: {
+  initialData: (Movie | TvShow) []
+}) {
   return (
     <Layout>
       <Head>
@@ -83,16 +86,7 @@ export default function IndexPage(props) {
         />
       </div>
       <section className="container grid grid-cols-2 place-items-center md:grid-cols-4">
-        <Card
-          image={{
-            src: "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ri8xr223xBb2TeHX3GKypvQPV2B.jpg",
-            alt: "Poster The Leftovers",
-          }}
-          title="The Leftovers"
-          rating={10}
-        />
-
-        <CardSkeleton />
+         {props.initialData.map(item => <Card  key={item.id} {...movieOrTvShowToCardProps(item)} />)}
       </section>
     </Layout>
   )
@@ -108,7 +102,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
   
   const data = await client.loadPopularShowsAndMovies(1)
 
-  console.log({data})
   return {
     props: {
       initialData: data,

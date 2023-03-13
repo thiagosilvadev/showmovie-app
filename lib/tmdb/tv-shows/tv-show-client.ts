@@ -23,11 +23,10 @@ export class TvShowClient extends Fetcher {
       }
     })
 
-    const data = this.handleResponse(response, (body) => ({
-      ...body!,
+    return this.handleResponse(response, (data) => ({
+      ...data,
+      results: data.results.map((tvshow) => ({ ...tvshow, __typename: 'TvShow' }))
     }))
-
-    return data
   }
 
   async loadTopRated(page = 1) {
@@ -39,11 +38,11 @@ export class TvShowClient extends Fetcher {
       }
     })
 
-    const data = this.handleResponse(response, (body) => ({
-      ...body!
+    return this.handleResponse(response, (data) => ({
+      ...data,
+      results: data.results.map((tvshow) => ({ ...tvshow, __typename: 'TvShow' }))
     }))
 
-    return data
   }
 
   async loadDetails(tvshowId: number) {

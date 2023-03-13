@@ -1,13 +1,13 @@
 import { CardProps } from '@/components/card'
 import {Movie, TvShow} from '@/lib/tmdb/models'
 type MovieOrTvShow = Movie | TvShow
-export const MovieOrTvShowToCardProps = (movieOrTvShow: MovieOrTvShow): CardProps => {
+export const movieOrTvShowToCardProps = (movieOrTvShow: MovieOrTvShow): CardProps => {
   // switch typename
   switch (movieOrTvShow.__typename) {
     case 'Movie':
       return {
         image: {
-          src: movieOrTvShow.poster_path,
+          src: `https://image.tmdb.org/t/p/original/${movieOrTvShow.poster_path}`,
           alt: movieOrTvShow.title
         },
         title: movieOrTvShow.title,
@@ -17,7 +17,7 @@ export const MovieOrTvShowToCardProps = (movieOrTvShow: MovieOrTvShow): CardProp
     case 'TvShow':
       return {
         image: {
-          src: movieOrTvShow.poster_path,
+          src: `https://image.tmdb.org/t/p/original/${movieOrTvShow.poster_path}`,
           alt: movieOrTvShow.name
         },
         title: movieOrTvShow.name,

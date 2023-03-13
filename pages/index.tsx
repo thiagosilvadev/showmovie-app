@@ -1,11 +1,20 @@
+import { GetServerSideProps } from "next"
 import Head from "next/head"
 import Link from "next/link"
+import { FetchHttpClient } from "@/infra/protocols/http/fetch-http-client"
+import { Search } from "lucide-react"
 
-import { siteConfig } from "@/config/site"
+import TMDBClient from "@/lib/tmdb/tmdb-client"
+import { Card, CardSkeleton, LateralCard } from "@/components/card"
 import { Layout } from "@/components/layout"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Typography } from "@/components/ui/typography"
 
-export default function IndexPage() {
+
+export default function IndexPage(props) {
+  console.log(props)
   return (
     <Layout>
       <Head>
@@ -19,34 +28,90 @@ export default function IndexPage() {
       </Head>
       <section className="container grid items-center gap-6 pt-6 pb-8 md:py-10">
         <div className="flex max-w-[980px] flex-col items-start gap-2">
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
-            Beautifully designed components <br className="hidden sm:inline" />
-            built with Radix UI and Tailwind CSS.
-          </h1>
-          <p className="max-w-[700px] text-lg text-slate-700 dark:text-slate-400 sm:text-xl">
-            Accessible and customizable components that you can copy and paste
-            into your apps. Free. Open Source. And Next.js 13 Ready.
-          </p>
+          <Typography className="leading-none text-dark-900 dark:text-white">
+            Bem vindo
+            <br /> ao ShowMovie!
+          </Typography>
+          <Typography variant="h4">
+            Encontre milhares de filmes e séries, faça a sua pesquisa:
+          </Typography>
         </div>
-        <div className="flex gap-4">
-          <Link
-            href={siteConfig.links.docs}
-            target="_blank"
-            rel="noreferrer"
-            className={buttonVariants({ size: "lg" })}
-          >
-            Documentation
-          </Link>
-          <Link
-            target="_blank"
-            rel="noreferrer"
-            href={siteConfig.links.github}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            GitHub
-          </Link>
-        </div>
+        <form
+          className="group relative font-secondary md:max-w-md lg:max-w-xl"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <Label className="absolute left-4 top-2 text-dark-600 transition-transform">
+            Buscar por filmes ou séries
+          </Label>
+          <div className="flex h-16 font-secondary dark:bg-black/10">
+            <Input
+              placeholder="Ex: Breaking Bad"
+              className="font-base h-full flex-col items-end rounded-lg rounded-r-none border-r-0 px-4 pb-1 pt-4 leading-none focus:border-primary-500 focus:ring-0 placeholder:dark:text-dark-400 dark:focus:border-primary-500 lg:text-lg"
+            />
+            <Button
+              variant="outline"
+              className="h-full w-16 rounded-lg rounded-l-none border-l-0 transition-none group-focus-within:border-primary-500"
+            >
+              <Search size={24} />
+              <span className="sr-only">Pesquisar</span>
+            </Button>
+          </div>
+        </form>
+      </section>
+      <div className="container mb-2 space-y-2">
+        <LateralCard
+          image={{
+            src: "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ri8xr223xBb2TeHX3GKypvQPV2B.jpg",
+            alt: "Poster The Leftovers",
+          }}
+          title="The Leftovers"
+          subtitle="(2014)"
+          imageLayout="portrait"
+          description="Após dois por cento da população do mundo desaparecer, os que sobraram se esforçam para compreender."
+        />
+        <LateralCard
+          imageLayout="landscape"
+          lateralDetail="28 de maio de 2017"
+          image={{
+            src: "https://www.themoviedb.org/t/p/original/54Awkt69uuTtUKGnw8jIauBg0eI.jpg",
+            alt: "Poster The Leftovers",
+          }}
+          title="The Book of Kevin"
+          // subtitle="(2014)"
+          overtitle="t03e01"
+          description="Três anos depois dos Remanescentes Culpados se estabelecerem em Miracle, Texas, Kevin trabalha como chefe de polícia, mas seu trabalho se complica com a proximidade do sétimo aniversário da partida, já que alguns cidadãos estão convencidos de que outro evento apocalíptico está em andamento."
+        />
+      </div>
+      <section className="container grid grid-cols-2 place-items-center md:grid-cols-4">
+        <Card
+          image={{
+            src: "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ri8xr223xBb2TeHX3GKypvQPV2B.jpg",
+            alt: "Poster The Leftovers",
+          }}
+          title="The Leftovers"
+          rating={10}
+        />
+
+        <CardSkeleton />
       </section>
     </Layout>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const client = new TMDBClient(
+    new FetchHttpClient(process.env.NEXT_PUBLIC_TMDB_URL as string, {
+      api_key: process.env.NEXT_PUBLIC_API_KEY,
+      language: "pt-BR",
+    })
+  )
+  
+  const data = await client.loadPopularShowsAndMovies(1)
+
+  console.log({data})
+  return {
+    props: {
+      initialData: data,
+    },
+  }
 }
